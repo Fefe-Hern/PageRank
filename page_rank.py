@@ -12,13 +12,13 @@ def get_page_ranks(Adj, damping_factor):
     Returns:
         numpy.ndarray: The final page ranks of the nodes in the graph.
     """
-    M = create_adjacency_matrix(Adj)
+    M = normalize_adjacency_matrix(Adj)
     final_ranks, iterations = __check_convergence(M, damping_factor)
 
     return final_ranks, iterations
 
 
-def create_adjacency_matrix(Adj):
+def normalize_adjacency_matrix(Adj):
     """
     Creates a normalized adjacency matrix from a given adjacency matrix.
 
@@ -74,7 +74,8 @@ def __check_convergence(M, damping_factor):
 
 # Main function in case you want to run this file
 if __name__ == '__main__':
-    damping_factor = 0.85
+    # verifying correctness of the page rank algorithm
+    damping_factor = 1
     Adj = [
         [0, 1, 1, 0, 0, 0],
         [0, 0, 1, 1, 0, 0],
@@ -84,5 +85,20 @@ if __name__ == '__main__':
         [0, 0, 0, 0, 1, 0]
         ]
     ranks, iterations = get_page_ranks(Adj, damping_factor)
-    print("Converged in {} iterations".format(iterations))
-    print(ranks)
+    # Round to 2 decimal places:
+    print("ranks: ", np.round(ranks, 2))
+
+    # Verification phase:
+    # get eigenvector of Adj Matrix
+    M = normalize_adjacency_matrix(Adj)
+    
+    # get principal eigenvector of M
+    eigenvalues, eigenvectors = np.linalg.eig(M)
+    ## find the index of the largest eigenvalue
+    largest_eigenvalue_index = np.argmax(eigenvalues)
+    principal_eigenvector = eigenvectors[:, largest_eigenvalue_index]
+    ## normalize the principal eigenvector
+    principal_eigenvector = principal_eigenvector / np.sum(principal_eigenvector)
+
+    # Only show the real eig values, not imaginary.
+    print("principal eigenvector: ", principal_eigenvector.real)
